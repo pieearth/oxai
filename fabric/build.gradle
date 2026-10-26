@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
   minecraft "com.mojang:minecraft:${minecraft_version}"
-  mappings loom.officialMojangMappings()
+  mappings "net.fabricmc:yarn:${minecraft_version}+build.1:v2"
 
   implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
   implementation fabricApi.module("fabric-message-api-v1", project.fabric_version)
