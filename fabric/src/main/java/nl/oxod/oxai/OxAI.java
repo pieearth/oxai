@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class OxAI implements ClientModInitializer {
   public static final String MODID = "oxai";
@@ -17,7 +19,7 @@ public class OxAI implements ClientModInitializer {
   private OxAIConfig config;
   private OllamaClient ollamaClient;
 
-  private final List<String> messageQueue = new ArrayList<>();
+  private final Queue<String> messageQueue = new ConcurrentLinkedQueue<>();
   private int tickCounter = 0;
 
   @Override
@@ -40,7 +42,7 @@ public class OxAI implements ClientModInitializer {
       tickCounter++;
       if (tickCounter >= 20 && !messageQueue.isEmpty()) {
         tickCounter = 0;
-        String msg = sanitizeChatMessage(messageQueue.remove(0));
+        String msg = sanitizeChatMessage(messageQueue.poll());
         sendChatMessage(client, msg);
       }
     });
@@ -78,21 +80,25 @@ public class OxAI implements ClientModInitializer {
 
   private List<String> splitMessage(String message) {
     List<String> chunks = new ArrayList<>();
-    int maxLength = config.getMaxMessageLength();
     String prefix = config.getResponsePrefix();
+    int availableLength = config.getMaxMessageLength() - prefix.length();
 
-    if (message.length() + prefix.length() <= maxLength) {
-      chunks.add(prefix + message);
-      return chunks;
+    if (availableLength <= 0) {
+      throw new IllegalArgumentException("maxMessageLength must exceed responsePrefix length");
     }
 
-    String remaining = message;
+    String remaining = message.trim();
     while (!remaining.isEmpty()) {
-      int availableLength = maxLength - prefix.length();
-      int splitIndex = remaining.lastIndexOf(' ', availableLength);
-      if (splitIndex == -1 || splitIndex > availableLength) {
-        splitIndex = Math.min(availableLength, remaining.length());
+      if (remaining.length() <= availableLength) {
+        chunks.add(prefix + remaining);
+        break;
       }
+
+      int splitIndex = remaining.lastIndexOf(' ', availableLength);
+      if (splitIndex <= 0) {
+        splitIndex = availableLength;
+      }
+
       chunks.add(prefix + remaining.substring(0, splitIndex));
       remaining = remaining.substring(splitIndex).trim();
     }
