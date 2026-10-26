@@ -34,3 +34,5 @@ jobs:
           name: oxai-fabric-1.21.10-patched
           path: fabric/build/libs/*.jar
           if-no-files-found: error
+
+# Re-trigger build after enabling GitHub Actions on fork.
