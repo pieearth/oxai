@@ -6,13 +6,13 @@ plugins {
 
 dependencies {
   minecraft "com.mojang:minecraft:${minecraft_version}"
-  mappings "net.fabricmc:yarn:${minecraft_version}+build.1:v2"
+  mappings loom.officialMojangMappings()
 
-  implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-  implementation fabricApi.module("fabric-message-api-v1", project.fabric_version)
-  implementation fabricApi.module("fabric-lifecycle-events-v1", project.fabric_version)
+  modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+  modImplementation fabricApi.module("fabric-message-api-v1", project.fabric_version)
+  modImplementation fabricApi.module("fabric-lifecycle-events-v1", project.fabric_version)
 
-  implementation "com.terraformersmc:modmenu:${modmenu_version}"
+  modImplementation "com.terraformersmc:modmenu:${modmenu_version}"
 }
 
 repositories {
